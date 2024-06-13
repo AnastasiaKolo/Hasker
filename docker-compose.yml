@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16.3
+    restart: always
+    volumes:
+      - /D/pgdata:/pgdata
+    env_file:
+      - .pgenv
+    ports:
+      - 5432:5432
+
+# веб интерфейс для подключения к бд
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+volumes:
+  pgdata:
