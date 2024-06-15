@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'qa.apps.QaConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -114,6 +115,11 @@ USE_I18N = True
 
 USE_TZ = True
 
+# User settings: auth pages, base user model
+
+# AUTH_USER_MODEL = "users.User"
+# LOGIN_URL = "user:login"
+# LOGOUT_URL = "user:logout"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
