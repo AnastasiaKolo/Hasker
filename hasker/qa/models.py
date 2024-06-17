@@ -10,13 +10,15 @@ class Tag(models.Model):
 
 
 class Question(models.Model):
-    pub_date = models.DateTimeField("date published")
     title = models.CharField(max_length=200)
     question_text = models.TextField()
     votes = models.IntegerField(default=0)
     # author = models.ForeignKey(User, on_delete=models.CASCADE)
     created = models.DateTimeField("date created")
     tags = models.ManyToManyField(Tag, related_name="questions")
+
+    def __str__(self):
+        return self.title
 
 
 class Answer(models.Model):
@@ -27,3 +29,5 @@ class Answer(models.Model):
     created = models.DateTimeField("date created")
     # author = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.answer_text
