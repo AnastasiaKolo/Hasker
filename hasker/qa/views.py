@@ -2,6 +2,7 @@ from django.db.models import F
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils import timezone
 from django.views import generic
 
 from .models import Answer, Question
@@ -13,12 +14,18 @@ class IndexView(generic.ListView):
 
     def get_queryset(self):
         """Return the last five published questions."""
-        return Question.objects.order_by("-created")[:5]
-
+        # return Question.objects.order_by("-created")[:5]
+        return Question.objects.filter(created__lte=timezone.now()).order_by("-created")[:5]
 
 class DetailView(generic.DetailView):
     model = Question
     template_name = "qa/detail.html"
+
+    def get_queryset(self):
+        """
+        Excludes any questions that aren't published yet.
+        """
+        return Question.objects.filter(created__lte=timezone.now())
 
 
 class ResultsView(generic.DetailView):

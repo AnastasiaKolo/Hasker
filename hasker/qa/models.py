@@ -1,5 +1,8 @@
+import datetime
+
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 
 
 class Tag(models.Model):
@@ -19,6 +22,10 @@ class Question(models.Model):
 
     def __str__(self):
         return self.title
+
+    def was_published_recently(self):
+        now = timezone.now()
+        return now - datetime.timedelta(days=1) <= self.created <= now
 
 
 class Answer(models.Model):
