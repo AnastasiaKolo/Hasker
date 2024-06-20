@@ -13,7 +13,7 @@ class IndexView(generic.ListView):
     context_object_name = "latest_question_list"
 
     def get_queryset(self):
-        """Return the last five published questions."""
+        """Return the last five created questions."""
         # return Question.objects.order_by("-created")[:5]
         return Question.objects.filter(created__lte=timezone.now()).order_by("-created")[:5]
 
@@ -23,7 +23,7 @@ class DetailView(generic.DetailView):
 
     def get_queryset(self):
         """
-        Excludes any questions that aren't published yet.
+        Excludes any questions that are created with date in the future.
         """
         return Question.objects.filter(created__lte=timezone.now())
 

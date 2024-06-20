@@ -1,5 +1,6 @@
 import datetime
 
+from django.contrib import admin
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
@@ -23,7 +24,12 @@ class Question(models.Model):
     def __str__(self):
         return self.title
 
-    def was_published_recently(self):
+    @admin.display(
+        boolean=True,
+        ordering="created",
+        description="Created recently?",
+    )
+    def was_created_recently(self):
         now = timezone.now()
         return now - datetime.timedelta(days=1) <= self.created <= now
 
