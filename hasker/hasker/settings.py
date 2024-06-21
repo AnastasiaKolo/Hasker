@@ -32,13 +32,13 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'qa.apps.QaConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'qa.apps.QaConfig',
 ]
 
 MIDDLEWARE = [
@@ -138,6 +138,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 TESTING = "test" in sys.argv
 
 # If you’re running tests in your project you shouldn’t activate the debug toolbar:
+# https://django-debug-toolbar.readthedocs.io/en/latest/tips.html#the-toolbar-isn-t-displayed
 
 if not TESTING:
     INSTALLED_APPS = [
