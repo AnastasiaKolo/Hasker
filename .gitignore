@@ -1,2 +1,7 @@
 .venv/*
 .idea/*
+Hasker.code-workspace
+hasker/hasker/__pycache__/*
+hasker/qa/__pycache__/*
+hasker/qa/migrations/__pycache__/*
+.idea/workspace.xml
