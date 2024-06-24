@@ -11,20 +11,19 @@ class AnswerInline(admin.TabularInline):
     model = Answer
     extra = 1
 
-
+@admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {"fields": ["title", "question_text", "tags"]}),
         ("Date information", {"fields": ["created"]}),
     ]
     inlines = [AnswerInline]
-    list_display = ["title", "created", "was_created_recently"]
+    list_display = ["title", "created", "was_created_recently", "display_tags"]
     list_filter = ["created"]
     search_fields = ["question_text"]
-
-
-admin.site.register(Question, QuestionAdmin)
+    
+# admin.site.register(Question, QuestionAdmin)
 
 admin.site.register(Tag)
 
-admin.site.register(Answer)
+# admin.site.register(Answer)
