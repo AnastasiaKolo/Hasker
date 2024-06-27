@@ -1,0 +1,44 @@
+{% extends "qa/base_generic.html" %}
+
+{% block content %}
+    <h1>Title: {{ question.title }}</h1>
+
+    <p><a href="">Author</a><strong> asked </strong> {{ question.created }}:</p>
+    <!-- author detail link not yet defined -->
+    <p>{{ question.question_text }}</p>
+    <p><strong>Tags:</strong> {{ question.display_tags }}</p>
+
+    <div style="margin-left:20px;margin-top:20px">
+    <h4>Answers</h4>
+
+    {% for answer in question.answer_set.all %}
+        <hr />
+        <p
+            class="{% if answer.status == 1 %}text-success{% else %}text-warning{% endif %}">
+            {{ answer.get_status_display }}
+        </p>
+        
+        <p>{{ answer.answer_text }}</p>
+        <p class="text-muted"><a href="">Author</a> <strong> answered </strong> {{ answer.created }}</p>
+    {% endfor %}
+    </div>
+{% endblock %}
+
+
+{% comment %} {% load static %}
+
+<link rel="stylesheet" href="{% static 'qa/style.css' %}">
+
+<form action="{% url 'qa:answer' question.id %}" method="post">
+{% csrf_token %}
+<fieldset>
+    <legend><h1>{{ question.question_text }}</h1></legend>
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+    {% for answer in question.answer_set.all %}
+        <input type="radio" name="answer" id="answer{{ forloop.counter }}" value="{{ answer.id }}">
+        <label for="answer{{ forloop.counter }}">{{ answer.answer_text }}</label><br>
+    {% endfor %}
+</fieldset>
+<input type="submit" value="Vote">
+</form>
+<body></body> {% endcomment %}

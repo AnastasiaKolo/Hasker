@@ -5,3 +5,6 @@ hasker/hasker/__pycache__/*
 hasker/qa/__pycache__/*
 hasker/qa/migrations/__pycache__/*
 .idea/workspace.xml
+hasker/avatars/*
+hasker/users/__pycache__/*
+hasker/users/migrations/__pycache__/*
