@@ -125,6 +125,7 @@ USE_TZ = True
 # AUTH_USER_MODEL = "users.User"
 # LOGIN_URL = "user:login"
 # LOGOUT_URL = "user:logout"
+LOGIN_REDIRECT_URL = '/'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
@@ -150,3 +151,5 @@ if not TESTING:
         "debug_toolbar.middleware.DebugToolbarMiddleware",
         *MIDDLEWARE,
     ]
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
