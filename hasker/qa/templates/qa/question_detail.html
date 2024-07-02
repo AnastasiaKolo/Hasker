@@ -3,7 +3,7 @@
 {% block content %}
     <h1>Title: {{ question.title }}</h1>
 
-    <p><a href="">Author</a><strong> asked </strong> {{ question.created }}:</p>
+    <p><a href="">{{ question.author }}</a><strong> asked </strong> {{ question.created }}:</p>
     <!-- author detail link not yet defined -->
     <p>{{ question.question_text }}</p>
     <p><strong>Tags:</strong> {{ question.display_tags }}</p>
@@ -19,7 +19,7 @@
         </p>
         
         <p>{{ answer.answer_text }}</p>
-        <p class="text-muted"><a href="">Author</a> <strong> answered </strong> {{ answer.created }}</p>
+        <p class="text-muted"><a href="">{{ answer.author }}</a> <strong> answered </strong> {{ answer.created }}</p>
     {% endfor %}
     </div>
 {% endblock %}

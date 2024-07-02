@@ -25,6 +25,7 @@ from .settings import TESTING
 
 urlpatterns = [
     path("qa/", include("qa.urls")),
+    path("users/", include("users.urls")),
     path("admin/", admin.site.urls),
     # Add URL maps to redirect the base URL to our application
     path('', RedirectView.as_view(url='qa/')),
@@ -43,3 +44,5 @@ urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += [
     path('accounts/', include('django.contrib.auth.urls')),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

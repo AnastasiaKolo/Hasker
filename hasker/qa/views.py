@@ -1,11 +1,13 @@
 """ Views for Q&A application """
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import F
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views import generic
+from django.views.generic.edit import CreateView
 
 from .models import Answer, Question, Tag
 
@@ -90,3 +92,12 @@ def answer(request, question_id):
 #     latest_question_list = Question.objects.order_by("-created")[:5]
 #     context = {"latest_question_list": latest_question_list}
 #     return render(request, "qa/index.html", context)
+
+
+class QuestionCreate(LoginRequiredMixin, CreateView):
+    model = Question
+    fields = ['title', 'question_text', 'tags']
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)

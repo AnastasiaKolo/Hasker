@@ -12,4 +12,6 @@ urlpatterns = [
     path("<int:pk>/results/", views.ResultsView.as_view(), name="results"),
     # ex: /qa/5/answer/ -
     path("<int:question_id>/answer/", views.answer, name="answer"),
+    # ex: /qa/question/create/ - create new question
+    path('question/create/', views.QuestionCreate.as_view(), name='question_create'),
 ]
