@@ -152,4 +152,7 @@ if not TESTING:
         *MIDDLEWARE,
     ]
 
+# to print emails to console
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+MAX_FILE_SIZE = 102400  

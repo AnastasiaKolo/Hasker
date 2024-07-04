@@ -1,8 +1,11 @@
 """ Users profile model for Q&A application """
+from PIL import Image
 
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
+
+
 
 
 class Profile(models.Model):
@@ -12,12 +15,17 @@ class Profile(models.Model):
         verbose_name="Profile picture", upload_to="avatars",
         blank=True, null=True
     )
+    
+    def __str__(self):
+        return self.user.username
+    
+    def save(self, *args, **kwargs):
+        """ Resizing images """
+        super().save()
 
-    def get_absolute_url(self):
-        """ Get url to the profile """
-        return reverse('user:profile', kwargs={'username': self.user.username})
+        img = Image.open(self.avatar.path)
 
-    @property
-    def url(self):
-        """ Get url to the profile as property """
-        return self.get_absolute_url()
+        if img.height > 256 or img.width > 256:
+            new_img = (256, 256)
+            img.thumbnail(new_img)
+            img.save(self.avatar.path)

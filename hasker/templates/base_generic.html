@@ -31,7 +31,14 @@
                             <li><a href="">search</a></li>
                             {% if user.is_authenticated %}
                                 <li><a href="{% url 'qa:question_create' %}">Ask!</a></li>
-                                <li>User: {{ user.get_username }}</li>
+                                <li>
+                                    <a href="{% url 'users:profile' %}">{{ user.get_username }}</a>
+                                    {% if user.avatar %}
+                                        <img src="{{ user.avatar.url }}" width=32 height="32" />
+                                    {% else %}
+                                        <img src="{% static "qa/img/default_avatar.png" %}" width=32 height="32" />
+                                    {% endif %}
+                                </li>
                                 <li>
                                     <form id="logout-form" method="post" action="{% url 'logout' %}">
                                         {% csrf_token %}

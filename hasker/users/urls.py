@@ -4,6 +4,7 @@ from . import views
 
 app_name = "users"
 urlpatterns = [
-    # ex: /users/5/ - user detail view 
-    path("<int:pk>/", views.UserDetailView.as_view(), name="user_detail"),
+    # ex: /users/profile - current user profile view or edit
+    path("profile", views.profile, name="profile"),
+    path("password-change/", views.ChangePasswordView.as_view(), name='password_change'),
 ]
