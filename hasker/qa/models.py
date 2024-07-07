@@ -2,6 +2,8 @@
 
 import datetime
 
+from typing import Union
+
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.db import models
@@ -10,9 +12,14 @@ from django.utils import timezone
 from django.urls import reverse
 
 
+class VoteStatus(models.IntegerChoices):
+    """ Status choices for question or answer votes """
+    LIKE = 1
+    DISLIKE = -1
 
 
 class Tag(models.Model):
+    """ Tags for questions """
     tag_text = models.CharField(
         max_length=200,
         unique=True,
@@ -36,15 +43,24 @@ class Tag(models.Model):
 
 
 class Question(models.Model):
+    """ A question asked by site user """
     title = models.CharField(max_length=200)
     question_text = models.TextField()
-    votes = models.IntegerField(default=0)
+    votes_count = models.IntegerField(default=0)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     created = models.DateTimeField("date created", default=datetime.datetime.now)
     tags = models.ManyToManyField(
         Tag,
         related_name="questions",
         help_text="Select tags for this question")
+    correct_answer = models.OneToOneField(
+        to="Answer",
+        null=True,
+        blank=True,
+        related_name="correct_answer_for",
+        on_delete=models.CASCADE
+    )
+    
 
     def __str__(self):
         return f"{self.title}"
@@ -72,10 +88,41 @@ class Question(models.Model):
     display_tags.short_description = 'Tags'
 
 
+class QuestionVote(models.Model):
+    """ 
+    A User can 'like' or 'dislike' a question 
+    Only one vote for one user for each question is available
+    """
+    question = models.ForeignKey(
+        Question, 
+        on_delete=models.CASCADE,
+        related_name="votes",)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    vote = models.IntegerField(
+        choices=VoteStatus.choices,
+        blank=True,
+        default=0,
+        help_text="Vote status")
+
+    def __str__(self):
+        return f"{self.vote}"
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "question"],
+                name="question_vote_only_one_by_user",
+                violation_error_message = "A user can vote for a question only once"
+            ),
+        ]
+
+
 class Answer(models.Model):
+    """ An answer to a question """
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     answer_text = models.TextField()
-    votes = models.IntegerField(default=0)
+    votes_count = models.IntegerField(default=0)
     created = models.DateTimeField("date created", default=datetime.datetime.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -95,3 +142,67 @@ class Answer(models.Model):
 
     class Meta:
         ordering = ['created']
+
+
+class AnswerVote(models.Model):
+    """ 
+    A User can 'like' or 'dislike' an answer 
+    Only one vote for one user for each answer is available
+    """
+    answer = models.ForeignKey(
+        Answer,
+        on_delete=models.CASCADE,
+        related_name="votes",)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    vote = models.IntegerField(
+        choices=VoteStatus.choices,
+        blank=True,
+        default=0,
+        help_text="Vote status")
+
+    def __str__(self):
+        return f"{self.vote}"
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "answer"],
+                name="answer_vote_only_one_by_user",
+                violation_error_message = "A user can vote for an answer only once"
+            ),
+        ]
+
+
+def do_vote(
+    vote_object: Union[Question, Answer],
+    user: User,
+    current_vote: VoteStatus) -> None:
+
+    """
+    Vote (like or dislike) for question or answer
+    :param vote_object: object to vote for (concrete question or answer)
+    :param user: user who votes
+    :param status: vote that should be made (like or dislike)
+    """
+
+    opposite_vote = VoteStatus.DISLIKE if current_vote == VoteStatus.LIKE else VoteStatus.LIKE
+    vote_object.votes.filter(
+        models.Q(user_id=user.id) &
+        models.Q(vote=opposite_vote)
+    ).delete()
+
+    user_action_is_already_done = vote_object.votes.filter(
+        models.Q(user_id=user.id) &
+        models.Q(vote=current_vote)
+    )
+
+    # revoke current vote if the same button is pressed again
+    if user_action_is_already_done.exists():
+        user_action_is_already_done.delete()
+        return
+
+    vote_object.votes.create(
+        user_id=user.id,
+        vote=current_vote
+    )

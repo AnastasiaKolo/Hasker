@@ -129,8 +129,9 @@ class QuestionDetailView(generic.DetailView):
 
 def vote(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
+    
     try:
-        selected_answer = question.answer_set.get(pk=request.POST["choice"])
+        current_vote = question.answer_set.get(user=request.user)
     except (KeyError, Answer.DoesNotExist):
         # Redisplay the question voting form.
         return render(

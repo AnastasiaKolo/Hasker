@@ -158,7 +158,17 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 MAX_FILE_SIZE = 102400  
 
-# settings for Q&A app
+############################
+### settings for Q&A app ###
+
+# number of questions showing on one page
 PAGINATE_QUESTIONS = 20
+
+# number of answers showing on one page
 PAGINATE_ANSWERS = 5
+
+# technical email address to send notifications
 TECH_EMAIL = "hasker@localhost"
+
+# number of trending questions showing on the sidebar
+TRENDING_COUNT = 10
