@@ -123,9 +123,10 @@ USE_TZ = True
 # User settings: auth pages, base user model
 
 # AUTH_USER_MODEL = "users.User"
-# LOGIN_URL = "user:login"
-# LOGOUT_URL = "user:logout"
+# LOGIN_URL = "users:login"
+# LOGOUT_URL = "users:logout"
 LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
@@ -153,6 +154,11 @@ if not TESTING:
     ]
 
 # to print emails to console
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 MAX_FILE_SIZE = 102400  
+
+# settings for Q&A app
+PAGINATE_QUESTIONS = 20
+PAGINATE_ANSWERS = 5
+TECH_EMAIL = "hasker@localhost"

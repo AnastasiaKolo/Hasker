@@ -13,3 +13,14 @@
     padding: 0;
     margin: 0;
     }
+
+/* Tags */
+.q_tags { margin-top: 10px; }
+.q_tags a {
+    font-size: small;
+    background: #4b9cf3;
+    color: white;
+    margin-right: 3px;
+    padding: 3px 4px;
+}
+

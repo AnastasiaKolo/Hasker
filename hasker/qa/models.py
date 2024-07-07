@@ -30,6 +30,10 @@ class Tag(models.Model):
             ),
         ]
 
+    def get_absolute_url(self):
+        """Returns the URL to access a particular instance of the model."""
+        return reverse('qa:tag_detail', args=[str(self.tag_text)])
+
 
 class Question(models.Model):
     title = models.CharField(max_length=200)

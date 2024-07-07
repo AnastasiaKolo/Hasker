@@ -8,3 +8,4 @@ hasker/qa/migrations/__pycache__/*
 hasker/avatars/*
 hasker/users/__pycache__/*
 hasker/users/migrations/__pycache__/*
+hasker/qa/templatetags/__pycache__/*
