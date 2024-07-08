@@ -87,7 +87,7 @@
             <li>
                 <span class="date">{{ answer.created|date:"d.m.Y" }}</span>
                 <a href="{% url "qa:detail" id=answer.question.pk %}#answer_{{ answer.id }}">
-                    {{ answer.answer_text|truncatewords:10 }}
+                    {{ answer.text|truncatewords:10 }}
                 </a>
                 (
                     {{ answer.votes }} {{ answer.votes|pluralize:"vote,votes" }},

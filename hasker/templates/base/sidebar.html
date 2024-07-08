@@ -14,9 +14,9 @@
     <ol class="list-unstyled mb-0">
     {% for q in top_q %}
         <li>
-            <span>{{ q.votes }}</span>
+            <span>{{ q.votes_count }}</span>
             <a href="{{ q.url }}">
-                {{ q.title|truncatewords:5 }}
+                {{ q.title|truncatewords:4 }}
             </a>
         </li>
     {% endfor %}

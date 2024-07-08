@@ -8,5 +8,5 @@ register = template.Library()
 
 @register.simple_tag
 def top_questions():
-    questions = Question.objects.all().order_by('-votes')[:settings.TRENDING_COUNT]
+    questions = Question.objects.all().order_by('-votes_count')[:settings.TRENDING_COUNT]
     return questions
