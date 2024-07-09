@@ -1,5 +1,5 @@
 """ Models for Q&A application """
-
+import datetime 
 from typing import Union
 
 from django.contrib import admin
@@ -34,6 +34,8 @@ class Tag(models.Model):
                 violation_error_message = "Tag already exists (case insensitive match)"
             ),
         ]
+        ordering = ["tag_text"]
+
 
     def get_absolute_url(self):
         """Returns the URL to access a particular instance of the model."""
@@ -44,18 +46,22 @@ class AbstractQA(models.Model):
     """ Abstract parent for Question and Answer models """
 
     text = models.TextField()
-    votes_count = models.IntegerField(default=0)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     created = models.DateTimeField("date created", default=timezone.now)
 
     class Meta:
         abstract = True
-        ordering = ['-votes_count','-created']
 
     @transaction.atomic
     def do_vote(self, user: User, current_vote: VoteStatus) -> None:
         """ Like or Dislike vote """
-        do_vote(action_object=self, user=user, current_vote=current_vote)
+        do_vote(vote_object=self, user=user, current_vote=current_vote)
+
+    @property
+    def votes_count(self):
+        """ Get total votes count """
+        votes = self.votes.aggregate(sum_votes=models.Sum("vote"))["sum_votes"]
+        return votes or 0
 
 
 class Question(AbstractQA):
@@ -100,17 +106,6 @@ class Answer(AbstractQA):
     """ An answer to a question """
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
-    ANSWER_STATUS = (
-        (0, 'Not checked yet'),
-        (1, 'Correct'),
-        (2, 'Wrong'),
-    )
-    status = models.IntegerField(
-        choices=ANSWER_STATUS,
-        blank=True,
-        default=0,
-        help_text='Answer status')
-
     def __str__(self):
         return f"{self.text}"
 
@@ -150,7 +145,6 @@ class QuestionVote(AbstractVote):
                 violation_error_message = "A user can vote for a question only once"
             ),
         ]
-
 
 
 class AnswerVote(AbstractVote):

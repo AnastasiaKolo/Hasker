@@ -1,11 +1,26 @@
-{% if user.is_authenticated %}
-    <div class="p-3">
-        <a class="btn btn-primary"
-            href="{% url "qa:question_create" %}">
-            Ask question
+
+<div class="p-3">
+    {% if user.is_authenticated %}
+        <p>
+            <a class="btn btn-primary"
+                href="{% url "qa:question_create" %}">
+                Ask question
+            </a>
+        </p>
+        <p>
+            <a class="btn btn-secondary"
+                href="{% url "qa:tag_create" %}">
+                Create tag
+            </a>
+        </p>
+    {% endif %}
+    <p>
+        <a class="btn btn-secondary"
+            href="{% url "qa:tag_list" %}">
+            All tags
         </a>
-    </div>
-{% endif %}
+    </p>
+</div>
 <div class="p-3 sidebar_questions">
     <h4>Trending</h4>
     {% load qa_extras %}

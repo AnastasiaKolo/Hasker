@@ -1,31 +1,43 @@
 {% extends "base/generic.html" %}
-
+{% load static %}
 {% block content %}
 <div class="container-fluid">
-    
     <div class="row">
         <div class="col-sm">
-
             <h3>{{ title }}</h3>
             {% if questions %}
-                <ul>
                 {% for question in questions %}
-                    <li>
-                        <a href="{% url 'qa:question_detail' question.id %}">
-                            {{ question.title|truncatewords:10 }}
-                        </a>
-                        {{ question.created }}
-                        {% for tag in question.tags.all %}
-                            <a href="{% url 'qa:tag_detail' tag.tag_text %}">{{ tag.tag_text }}</a>
-                        {% endfor %}
-                    </li>
+                    <div class="card">
+                        <div class="card-body">
+                            <a href="{% url 'qa:question_detail' question.id %}">
+                                {{ question.title|truncatewords:10 }}
+                            </a>
+                            <p class="card-text">{{ question.text|truncatewords:20 }}</p>
+                            {% for tag in question.tags.all %}
+                                <a 
+                                    class="btn btn-outline-secondary btn-sm" 
+                                    href="{% url 'qa:tag_detail' tag.tag_text %}">
+                                    {{ tag.tag_text }}
+                                </a>
+                            {% endfor %}
+                            {% include "qa/question_buttons.html" %}
+                        </div>
+                        <div class="card-footer text-muted">
+                            {% if question.author.profile.avatar %}
+                                <img src="{{ question.author.profile.avatar.url }}" width=32 height="32" />
+                            {% else %}
+                                <img src="{% static "qa/img/default_avatar.png" %}" width=32 height="32" />
+                            {% endif %}
+                            <a href="">{{ question.author }}</a> <strong> asked </strong> {{ question.created }}
+                        </div>
+                    </div>
                 {% endfor %}
-                </ul>
                 {% include "base/paginator.html" with page_obj=page_obj %}
             {% else %}
                 <p>No questions are available.</p>
             {% endif %}
         </div>
+
     </div>
 </div>
 {% endblock %}

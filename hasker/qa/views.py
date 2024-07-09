@@ -7,15 +7,14 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadReque
 
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse, resolve, reverse_lazy
-from django.views import generic
-from django.views.generic.detail import SingleObjectMixin
-from django.views.generic.edit import CreateView, FormView
+from django.views.generic import ListView, DetailView, RedirectView
+from django.views.generic.edit import CreateView
 
 from .models import Answer, Question, Tag
-from .forms import AnswerForm, TagForm
+from .forms import AnswerForm, TagForm, QuestionForm
 
 # https://docs.djangoproject.com/en/5.0/topics/class-based-views/generic-display/
-class QuestionListView(generic.ListView):
+class QuestionListView(ListView):
     """ View for listing all questions or for search results """
     model = Question
     template_name = "qa/question_list.html"
@@ -24,8 +23,7 @@ class QuestionListView(generic.ListView):
     search_phrase = ""
     tag_text = ""
     paginate_by = settings.PAGINATE_QUESTIONS
-    
-    
+        
     def dispatch(self, request, *args, **kwargs):
         url_name = resolve(self.request.path).url_name
         if url_name == "tag_detail":
@@ -62,7 +60,7 @@ class QuestionListView(generic.ListView):
         else:
             questions = Question.objects.all()
 
-        return questions
+        return sorted(questions, key=lambda a: (a.votes_count, a.created), reverse=True)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -77,7 +75,12 @@ class QuestionListView(generic.ListView):
         return context
 
 
-class QuestionDetailView(generic.DetailView):
+class TagListView(ListView):
+    model = Tag
+    paginate_by = 100
+
+
+class QuestionDetailView(DetailView):
     """ Shows question detail with its answers"""
     model = Question
     template_name = "qa/question_detail.html"
@@ -90,18 +93,22 @@ class QuestionDetailView(generic.DetailView):
 
         answers_page = self.request.GET.get("page", 1)
 
-        answers = self.object.answer_set.all()
-        answers_paginator = paginator.Paginator(
-            answers, self.answers_paginate_by
-        )
+        answers = sorted(
+            self.object.answer_set.all(), 
+            key=lambda a: (a.votes_count, a.created), reverse=True)
+        
+        context["answers"] = answers
+        # answers_paginator = paginator.Paginator(
+        #     answers, self.answers_paginate_by
+        # )
 
-        try:  # Catch invalid page numbers
-            answers_page_obj = answers_paginator.page(answers_page)
-        except (paginator.PageNotAnInteger, paginator.EmptyPage):
-            answers_page_obj = answers_paginator.page(1)
+        # try:  # Catch invalid page numbers
+        #     answers_page_obj = answers_paginator.page(answers_page)
+        # except (paginator.PageNotAnInteger, paginator.EmptyPage):
+        #     answers_page_obj = answers_paginator.page(1)
 
-        context["answers_page_obj"] = answers_page_obj
-        context["answers"] = answers_page_obj.object_list
+        # context["answers_page_obj"] = answers_page_obj
+        # context["answers"] = answers_page_obj.object_list
 
         return context
 
@@ -124,54 +131,42 @@ class QuestionDetailView(generic.DetailView):
 
         context = self.get_context_data(object=self.object)
         context["form"] = form
-        return self.render_to_response(context)
 
-
-def vote(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    
-    try:
-        current_vote = question.answer_set.get(user=request.user)
-    except (KeyError, Answer.DoesNotExist):
-        # Redisplay the question voting form.
-        return render(
-            request,
-            "qa/question_detail.html",
-            {
-                "question": question,
-                "error_message": "You didn't select a choice.",
-            },
-        )
-    else:
-        selected_answer.votes = F("votes") + 1
-        selected_answer.save()
         # Always return an HttpResponseRedirect after successfully dealing
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
-        return HttpResponseRedirect(reverse("qa:results", args=(question.id,)))
+        return HttpResponseRedirect(reverse("qa:question_detail", args=(self.object.id,)))
 
 
 class QuestionCreate(LoginRequiredMixin, CreateView):
+    """ Create question """
     model = Question
-    fields = ['title', 'text', 'tags']
+    form_class = QuestionForm
 
     def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
 
 
-class BaseVoteView(LoginRequiredMixin, CreateView):
+class TagCreate(LoginRequiredMixin, CreateView):
+    """ Create new tag """
+    model = Tag
+    form_class = TagForm
+    success_url = reverse_lazy("qa:tag_list")
 
+
+class BaseVoteView(LoginRequiredMixin, CreateView):
+    """ Base view for voting for questions or answers """
     http_method_names = ["get"]
 
     def get_redirect_url(self) -> str:
-
+        """ Get the page to go to after voting """
         if issubclass(self.model, Question):
             url_for_redirect = reverse_lazy("qa:index")
 
         elif issubclass(self.model, Answer):
             answer = get_object_or_404(self.model, id=int(self.kwargs.get(self.pk_url_kwarg)))
-            url_for_redirect = reverse_lazy("qa:question", args=(answer.question.id,))
+            url_for_redirect = reverse_lazy("qa:question_detail", args=(answer.question.id,))
 
         else:
             raise ValueError(
@@ -182,12 +177,12 @@ class BaseVoteView(LoginRequiredMixin, CreateView):
         return url_for_redirect
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-
+        """ Vote for question or answer """
         action_object_id = int(self.kwargs.get(self.pk_url_kwarg))
         action_object = get_object_or_404(self.model, id=action_object_id)
-        action_object.make_user_action(
+        action_object.do_vote(
             user=self.request.user,
-            action=int(self.kwargs.get("action"))
+            current_vote=int(self.kwargs.get("vote"))
         )
 
         return HttpResponseRedirect(self.get_redirect_url())
@@ -204,12 +199,11 @@ class AnswerVoteView(BaseVoteView):
     model = Answer
     pk_url_kwarg = "answer_id"
 
-class MarkCorrectAnswerView(LoginRequiredMixin, generic.RedirectView):
 
-    pattern_name = "qa:question"
+class MarkCorrectAnswerView(LoginRequiredMixin, RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
-        return reverse_lazy(self.pattern_name, kwargs={"question_id": kwargs["question_id"]})
+        return reverse_lazy("qa:question_detail", args=[kwargs["question_id"]])
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
 
@@ -219,12 +213,3 @@ class MarkCorrectAnswerView(LoginRequiredMixin, generic.RedirectView):
         question.save()
 
         return super().get(request, *args, **kwargs)
-
-
-class CreateTagView(LoginRequiredMixin, CreateView):
-
-    object: Tag
-    form_class = TagForm
-    template_name = "qa/create_tag.html"
-    http_method_names = ["get", "post"]
-    success_url = reverse_lazy("qa:index")

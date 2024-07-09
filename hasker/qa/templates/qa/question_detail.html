@@ -27,23 +27,7 @@
 
         {% for answer in question.answer_set.all %}
             <hr />
-            <p
-                class="{% if answer.status == 1 %}text-success{% else %}text-warning{% endif %}">
-                {{ answer.get_status_display }}
-            </p>
-            {% if user.is_authenticated %}
-                <form action="{% url 'qa:answer_vote' answer.id '+1' %}" method="GET">
-                    <button type="submit">Like</button>
-                </form>
-                <form action="{% url 'qa:answer_vote' answer.id '-1' %}" method="GET">
-                    <button type="submit">Dislike</button>
-                </form>
-                {% if user == question.author %}
-                    <form action="{% url 'qa:mark_answer_as_correct' question.id answer.id %}" method="GET">
-                        <button type="submit">Mark answer as correct</button>
-                    </form>
-                {% endif %}
-            {% endif %}
+            {% include "qa/answer_buttons.html" %}
             <p>{{ answer.text }}</p>
             <p class="text-muted">
                 {% if answer.author.profile.avatar %}
