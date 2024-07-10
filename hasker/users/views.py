@@ -1,3 +1,4 @@
+""" Views for managing user profiles """
 from django.contrib.auth.views import PasswordChangeView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.decorators import login_required
@@ -5,7 +6,31 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.urls import reverse_lazy
 
-from .forms import UserUpdateForm, ProfileUpdateForm
+from .forms import UserUpdateForm, ProfileUpdateForm, SignUpForm
+from .models import User, Profile
+
+
+def signup(request):
+    """ Function-based view for SignUp form """
+    if request.method == "POST":
+        print(request.POST, request.FILES)
+        user_form = SignUpForm(request.POST, request.FILES)
+        if user_form.is_valid():
+            user_form.save()
+            avatar = user_form.cleaned_data.get('avatar')
+            username = user_form.cleaned_data.get('username')
+            user = User.objects.get(username=username)
+            user_profile = Profile.objects.get(user=user)
+            user_profile.avatar = avatar
+            user_profile.save()
+            return redirect(to="login")
+    else:
+        user_form = SignUpForm()
+
+    return render(
+        request,
+        'registration/signup.html',
+        {'user_form': user_form})
 
 
 class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
@@ -17,8 +42,6 @@ class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
 @login_required
 def profile(request):
     """ Create instances of required forms depending on whether the request is get or post """
-    # profile_obj = get_object_or_404(Profile, user=request.user)
-    # return render(request, "users/profile.html", {"profile": profile_obj})
     if request.method == 'POST':
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)

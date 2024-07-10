@@ -32,11 +32,11 @@
             {% else %}
                 <div class="p-2">
                     <a class="btn_auth btn btn-sm btn-outline-secondary"
-                        href="{% url 'login' %}?next={{ request.path }}">
+                        href="{% url 'login' %}">
                         Login
                     </a>
                     <a class="btn_auth btn btn-sm btn-outline-secondary"
-                        href="">
+                        href="{% url "users:signup" %}">
                         Signup
                     </a>
                 </div>

@@ -13,11 +13,11 @@ urlpatterns = [
     path("question/create/", views.QuestionCreate.as_view(), name='question_create'),
     # ex: /qa/tag/create/ - create new tag
     path("tag/create/", views.TagCreate.as_view(), name='tag_create'),
-    # ex: /qa/tag/list/ - create new tag
+    # ex: /qa/tag/list/ - list all tags
     path("tag/list/", views.TagListView.as_view(), name='tag_list'),
     # ex: /qa/tag/linux - display all questions with this tag
     path("tag/<str:name>/", views.QuestionListView.as_view(), name="tag_detail"),
-    # ex: /qa/tag/linux - display all questions with this tag
+    # "mark answer as correct" button
     path("question/<int:question_id>/mark_answer_as_correct/<int:answer_id>",
         views.MarkCorrectAnswerView.as_view(),
         name="mark_answer_as_correct"),

@@ -17,12 +17,12 @@ class Profile(models.Model):
         return self.user.username
     
     def save(self, *args, **kwargs):
-        """ Resizing images """
+        """ Resizing avatar images on save"""
         super().save()
+        if self.avatar:
+            img = Image.open(self.avatar.path)
 
-        img = Image.open(self.avatar.path)
-
-        if img.height > 256 or img.width > 256:
-            new_img = (256, 256)
-            img.thumbnail(new_img)
-            img.save(self.avatar.path)
+            if img.height > 256 or img.width > 256:
+                new_img = (256, 256)
+                img.thumbnail(new_img)
+                img.save(self.avatar.path)

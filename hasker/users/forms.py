@@ -2,8 +2,19 @@
 
 from django.forms import ModelForm, EmailField, CharField, TextInput, ImageField, FileInput
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 
 from .models import Profile
+
+
+class SignUpForm(UserCreationForm):
+    """ Add avatar to standard user creation form """
+    avatar = ImageField(widget=FileInput(attrs={'class': 'form-control-file'}))
+    email = EmailField(required=True)
+    
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ["username", "email", "password1", "password2", "avatar"]
 
 
 class UserUpdateForm(ModelForm):
