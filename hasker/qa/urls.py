@@ -16,7 +16,7 @@ urlpatterns = [
     # ex: /qa/tag/list/ - list all tags
     path("tag/list/", views.TagListView.as_view(), name='tag_list'),
     # ex: /qa/tag/linux - display all questions with this tag
-    path("tag/<str:name>/", views.QuestionListView.as_view(), name="tag_detail"),
+    path("tag/<str:tag_text>/", views.QuestionListView.as_view(), name="tag_detail"),
     # "mark answer as correct" button
     path("question/<int:question_id>/mark_answer_as_correct/<int:answer_id>",
         views.MarkCorrectAnswerView.as_view(),

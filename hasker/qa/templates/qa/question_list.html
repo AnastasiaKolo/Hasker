@@ -12,6 +12,7 @@
                             <a href="{% url 'qa:question_detail' question.id %}">
                                 {{ question.title|truncatewords:10 }}
                             </a>
+                            [{{ question.num_answers }}]
                             <p class="card-text">{{ question.text|truncatewords:20 }}</p>
                             {% for tag in question.tags.all %}
                                 <a 

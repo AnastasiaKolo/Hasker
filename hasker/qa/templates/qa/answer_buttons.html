@@ -2,12 +2,12 @@
     <a 
         class="btn btn-outline-success btn-sm" 
         href="{% url 'qa:answer_vote' answer.id '+1' %}" 
-        >Like</a>
+        >+1</a>
     <span>{{ answer.votes_count }}</span>
     <a 
         class="btn btn-outline-danger btn-sm" 
         href="{% url 'qa:answer_vote' answer.id '-1' %}" 
-        >Dislike</a>
+        >-1</a>
     {% if question.correct_answer == answer %}
         <span class="badge badge-pill bg-success">This answer is correct</span>
     {% endif %}

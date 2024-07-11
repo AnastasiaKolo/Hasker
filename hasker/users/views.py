@@ -20,7 +20,7 @@ def signup(request):
             avatar = user_form.cleaned_data.get('avatar')
             username = user_form.cleaned_data.get('username')
             user = User.objects.get(username=username)
-            user_profile = Profile.objects.get(user=user)
+            user_profile = Profile.objects.get_or_create(user=user)[0]
             user_profile.avatar = avatar
             user_profile.save()
             return redirect(to="login")

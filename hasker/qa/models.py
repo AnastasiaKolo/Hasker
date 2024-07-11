@@ -95,19 +95,23 @@ class Question(AbstractQA):
         """Returns the URL to access a particular instance of the model."""
         return reverse('qa:question_detail', args=[str(self.id)])
 
+    @property
+    def url(self):
+        return self.get_absolute_url()
+
     def display_tags(self):
         """Create a string for the Tags. This is required to display tags in Admin."""
         return ', '.join(tag.tag_text for tag in self.tags.all())
 
     display_tags.short_description = 'Tags'
-
+    
 
 class Answer(AbstractQA):
     """ An answer to a question """
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.text}"
+        return f"votes:{self.votes_count}, {self.text}"
 
 
 class AbstractVote(models.Model):

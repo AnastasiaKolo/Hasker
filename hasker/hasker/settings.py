@@ -165,7 +165,7 @@ MAX_FILE_SIZE = 102400
 PAGINATE_QUESTIONS = 20
 
 # number of answers showing on one page
-PAGINATE_ANSWERS = 10
+PAGINATE_ANSWERS = 5
 
 # technical email address to send notifications
 TECH_EMAIL = "hasker@localhost"

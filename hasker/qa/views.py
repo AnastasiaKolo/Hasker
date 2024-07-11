@@ -2,10 +2,10 @@
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import paginator
-from django.db.models import F, Q
+from django.db.models import Q, Count
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpRequest
 
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, resolve, reverse_lazy
 from django.views.generic import ListView, DetailView, RedirectView
 from django.views.generic.edit import CreateView
@@ -27,7 +27,7 @@ class QuestionListView(ListView):
     def dispatch(self, request, *args, **kwargs):
         url_name = resolve(self.request.path).url_name
         if url_name == "tag_detail":
-            self.tag_text = self.kwargs.get("name", "")
+            self.tag_text = self.kwargs.get("tag_text", "")
             self.title = f"Tags: {self.tag_text}"
         
         elif url_name == "search_results":
@@ -41,7 +41,7 @@ class QuestionListView(ListView):
                 tag_text = self.search_phrase[4:].strip()
                 if not tag_text:
                     return HttpResponseBadRequest("Empty tag")
-                return redirect("qa:tag_detail", name=tag_text)
+                return redirect("qa:tag_detail", tag_text=tag_text)
         else:
             self.title = "Latest questions list"
             
@@ -52,13 +52,14 @@ class QuestionListView(ListView):
         if self.search_phrase:
             questions = Question.objects.filter(
                 Q(title__icontains=self.search_phrase) |
-                Q(question_text__icontains=self.search_phrase)
+                Q(text__icontains=self.search_phrase)
             )
         elif self.tag_text:
             tag = get_object_or_404(Tag, tag_text=self.tag_text)
             questions = tag.questions.all()
         else:
             questions = Question.objects.all()
+        questions = questions.annotate(num_answers=Count("answer"))
 
         return sorted(questions, key=lambda a: (a.votes_count, a.created), reverse=True)
 
@@ -96,19 +97,19 @@ class QuestionDetailView(DetailView):
         answers = sorted(
             self.object.answer_set.all(), 
             key=lambda a: (a.votes_count, a.created), reverse=True)
-        
+
         context["answers"] = answers
-        # answers_paginator = paginator.Paginator(
-        #     answers, self.answers_paginate_by
-        # )
+        answers_paginator = paginator.Paginator(
+            answers, self.answers_paginate_by
+        )
 
-        # try:  # Catch invalid page numbers
-        #     answers_page_obj = answers_paginator.page(answers_page)
-        # except (paginator.PageNotAnInteger, paginator.EmptyPage):
-        #     answers_page_obj = answers_paginator.page(1)
+        try:  # Catch invalid page numbers
+            answers_page_obj = answers_paginator.page(answers_page)
+        except (paginator.PageNotAnInteger, paginator.EmptyPage):
+            answers_page_obj = answers_paginator.page(1)
 
-        # context["answers_page_obj"] = answers_page_obj
-        # context["answers"] = answers_page_obj.object_list
+        context["answers_page_obj"] = answers_page_obj
+        context["answers"] = answers_page_obj.object_list
 
         return context
 
@@ -159,13 +160,14 @@ class BaseVoteView(LoginRequiredMixin, CreateView):
     """ Base view for voting for questions or answers """
     http_method_names = ["get"]
 
-    def get_redirect_url(self) -> str:
+    def get_redirect_url(self, request: HttpRequest) -> str:
         """ Get the page to go to after voting """
         if issubclass(self.model, Question):
-            url_for_redirect = reverse_lazy("qa:index")
+            # redirect to parameter next if exists
+            url_for_redirect = request.GET.get('next', reverse_lazy("qa:index"))
 
         elif issubclass(self.model, Answer):
-            answer = get_object_or_404(self.model, id=int(self.kwargs.get(self.pk_url_kwarg)))
+            answer = get_object_or_404(Answer, id=int(self.kwargs.get(self.pk_url_kwarg)))
             url_for_redirect = reverse_lazy("qa:question_detail", args=(answer.question.id,))
 
         else:
@@ -185,7 +187,7 @@ class BaseVoteView(LoginRequiredMixin, CreateView):
             current_vote=int(self.kwargs.get("vote"))
         )
 
-        return HttpResponseRedirect(self.get_redirect_url())
+        return HttpResponseRedirect(self.get_redirect_url(request))
 
 
 class QuestionVoteView(BaseVoteView):
