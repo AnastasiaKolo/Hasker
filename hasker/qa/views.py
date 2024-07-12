@@ -2,11 +2,14 @@
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import paginator
+from django.core.mail import send_mail
+
 from django.db.models import Q, Count
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpRequest
 
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, resolve, reverse_lazy
+from django.utils.text import Truncator
 from django.views.generic import ListView, DetailView, RedirectView
 from django.views.generic.edit import CreateView
 
@@ -116,7 +119,7 @@ class QuestionDetailView(DetailView):
     def post(self, request, *args, **kwargs):
         """ Used for posting answer to the question """
         self.object = self.get_object()
-
+        print('posting answer')
         if not request.user.is_authenticated:
             return super().get(request, *args, **kwargs)
 
@@ -128,6 +131,7 @@ class QuestionDetailView(DetailView):
                 question=self.object
             )
             answer_instance.save()
+            self.notify_question_author(answer_instance)
             form = AnswerForm()
 
         context = self.get_context_data(object=self.object)
@@ -137,6 +141,24 @@ class QuestionDetailView(DetailView):
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect(reverse("qa:question_detail", args=(self.object.id,)))
+
+    @staticmethod
+    def notify_question_author(answer):
+        """ Notify the author of the question when a new answer is added """
+        title_truncated = Truncator(answer.question.title)
+
+        subject = f"New reply for '{title_truncated.words(5)}' - Hasker"
+        message = f"""
+            <p>{answer.author.username} has replied to your question
+            <a href="{answer.question.url}">{title_truncated.words(10)}</a>:</p>
+            <p>{Truncator(answer.text).words(25)}</p>
+        """
+        from_email = settings.TECH_EMAIL
+        recipient_list = [answer.question.author.email]
+        print(f'sending mail to {recipient_list}' )
+        send_mail(
+            subject, message, from_email, recipient_list
+        )
 
 
 class QuestionCreate(LoginRequiredMixin, CreateView):
