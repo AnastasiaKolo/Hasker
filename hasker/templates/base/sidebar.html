@@ -29,7 +29,7 @@
     <ol class="list-unstyled mb-0">
     {% for q in top_q %}
         <li>
-            <span>{{ q.votes_count }}</span>
+            <span class="badge bg-secondary">{{ q.votes_count }}</span>
             <a href="{{ q.url }}">
                 {{ q.title|truncatewords:4 }}
             </a>
