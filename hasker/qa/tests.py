@@ -36,14 +36,14 @@ class QuestionModelTests(TestCase):
         self.assertIs(recent_question.was_created_recently(), True)
 
 
-def create_question(question_text, days):
+def create_question(text, days):
     """
-    Create a question with the given `question_text` and created the
+    Create a question with the given `text` and created the
     given number of `days` offset to now (negative for questions created
     in the past, positive for questions that have yet to be created).
     """
     time = timezone.now() + datetime.timedelta(days=days)
-    return Question.objects.create(question_text=question_text, created=time)
+    return Question.objects.create(text=text, created=time)
 
 
 class QuestionIndexViewTests(TestCase):
@@ -61,7 +61,7 @@ class QuestionIndexViewTests(TestCase):
         Questions with a created in the past are displayed on the
         index page.
         """
-        question = create_question(question_text="Past question.", days=-30)
+        question = create_question(text="Past question.", days=-30)
         response = self.client.get(reverse("qa:index"))
         self.assertQuerySetEqual(
             response.context["latest_question_list"],
@@ -73,7 +73,7 @@ class QuestionIndexViewTests(TestCase):
         Questions with a created in the future aren't displayed on
         the index page.
         """
-        create_question(question_text="Future question.", days=30)
+        create_question(text="Future question.", days=30)
         response = self.client.get(reverse("qa:index"))
         self.assertContains(response, "No questions are available.")
         self.assertQuerySetEqual(response.context["latest_question_list"], [])
@@ -83,8 +83,8 @@ class QuestionIndexViewTests(TestCase):
         Even if both past and future questions exist, only past questions
         are displayed.
         """
-        question = create_question(question_text="Past question.", days=-30)
-        create_question(question_text="Future question.", days=30)
+        question = create_question(text="Past question.", days=-30)
+        create_question(text="Future question.", days=30)
         response = self.client.get(reverse("qa:index"))
         self.assertQuerySetEqual(
             response.context["latest_question_list"],
@@ -95,8 +95,8 @@ class QuestionIndexViewTests(TestCase):
         """
         The questions index page may display multiple questions.
         """
-        question1 = create_question(question_text="Past question 1.", days=-30)
-        question2 = create_question(question_text="Past question 2.", days=-5)
+        question1 = create_question(text="Past question 1.", days=-30)
+        question2 = create_question(text="Past question 2.", days=-5)
         response = self.client.get(reverse("qa:index"))
         self.assertQuerySetEqual(
             response.context["latest_question_list"],
@@ -107,20 +107,20 @@ class QuestionIndexViewTests(TestCase):
 class QuestionDetailViewTests(TestCase):
     def test_future_question(self):
         """
-        The detail view of a question with a pub_date in the future
+        The question_detail view of a question with a pub_date in the future
         returns a 404 not found.
         """
-        future_question = create_question(question_text="Future question.", days=5)
-        url = reverse("qa:detail", args=(future_question.id,))
+        future_question = create_question(text="Future question.", days=5)
+        url = reverse("qa:question_detail", args=(future_question.id,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
 
     def test_past_question(self):
         """
-        The detail view of a question with a pub_date in the past
+        The question_detail view of a question with a pub_date in the past
         displays the question's text.
         """
-        past_question = create_question(question_text="Past Question.", days=-5)
-        url = reverse("qa:detail", args=(past_question.id,))
+        past_question = create_question(text="Past Question.", days=-5)
+        url = reverse("qa:question_detail", args=(past_question.id,))
         response = self.client.get(url)
-        self.assertContains(response, past_question.question_text)
+        self.assertContains(response, past_question.text)

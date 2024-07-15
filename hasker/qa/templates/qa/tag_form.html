@@ -1,0 +1,10 @@
+{% extends "base/generic.html" %}
+
+{% block content %}
+<h3> Create tag </h3>
+<form action="{% url 'qa:tag_create' %}" method="post">
+    {% csrf_token %}
+    {{ form.as_table }}
+    <input type="submit" value="Submit">
+</form>
+{% endblock %}

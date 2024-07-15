@@ -28,6 +28,10 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # Add URL maps to redirect the base URL to our application
     path('', RedirectView.as_view(url='qa/')),
+    # Custom users app urls
+    path("users/", include("users.urls")),
+    # Add Django site authentication urls (for login, logout, password management)
+    path('users/', include('django.contrib.auth.urls')),
 ]
 
 if not TESTING:
@@ -38,3 +42,5 @@ if not TESTING:
 
 # Use static() to add URL mapping to serve static files during development (only)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

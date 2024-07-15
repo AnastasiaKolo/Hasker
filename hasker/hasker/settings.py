@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'qa.apps.QaConfig',
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
@@ -122,8 +123,10 @@ USE_TZ = True
 # User settings: auth pages, base user model
 
 # AUTH_USER_MODEL = "users.User"
-# LOGIN_URL = "user:login"
-# LOGOUT_URL = "user:logout"
+LOGIN_URL = "/users/login/"
+LOGOUT_URL = "/users/logout/"
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
@@ -149,3 +152,23 @@ if not TESTING:
         "debug_toolbar.middleware.DebugToolbarMiddleware",
         *MIDDLEWARE,
     ]
+
+# to print emails to console
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+MAX_FILE_SIZE = 102400  
+
+############################
+### settings for Q&A app ###
+
+# number of questions showing on one page
+PAGINATE_QUESTIONS = 20
+
+# number of answers showing on one page
+PAGINATE_ANSWERS = 5
+
+# technical email address to send notifications
+TECH_EMAIL = "hasker@localhost"
+
+# number of trending questions showing on the sidebar
+TRENDING_COUNT = 10

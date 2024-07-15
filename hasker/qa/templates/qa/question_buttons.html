@@ -1,0 +1,11 @@
+{% if user.is_authenticated %}
+    <a 
+        class="btn btn-outline-success btn-sm" 
+        href="{% url 'qa:question_vote' question.id '+1' %}?next={{ request.path }}"
+        >+1</a>
+    <span>{{ question.votes_count }}</span>
+    <a 
+        class="btn btn-outline-danger btn-sm" 
+        href="{% url 'qa:question_vote' question.id '-1' %}?next={{ request.path }}" 
+        >-1</a>
+{% endif %}

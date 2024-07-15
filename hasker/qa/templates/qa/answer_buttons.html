@@ -1,0 +1,19 @@
+{% if user.is_authenticated %}
+    <a 
+        class="btn btn-outline-success btn-sm" 
+        href="{% url 'qa:answer_vote' answer.id '+1' %}" 
+        >+1</a>
+    <span>{{ answer.votes_count }}</span>
+    <a 
+        class="btn btn-outline-danger btn-sm" 
+        href="{% url 'qa:answer_vote' answer.id '-1' %}" 
+        >-1</a>
+    {% if question.correct_answer == answer %}
+        <span class="badge badge-pill bg-success">This answer is correct</span>
+    {% endif %}
+    {% if user == question.author and question.correct_answer != answer%}
+        <a 
+            class="btn btn-outline-success  btn-sm" 
+            href="{% url 'qa:mark_answer_as_correct' question.id answer.id %}">Mark answer as correct</a>
+    {% endif %}
+{% endif %}

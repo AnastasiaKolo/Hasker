@@ -1,0 +1,16 @@
+{% extends "base/generic.html" %}
+{% load static %}
+{% block content %}
+    <h3>All tags:</h3>
+    {% for tag in object_list %}
+    
+            <a 
+                class="btn btn-outline-secondary btn-sm" 
+                href="{% url 'qa:tag_detail' tag.tag_text %}">
+                {{ tag.tag_text }}
+            </a>
+
+    {% empty %}
+        <li>No tags yet.</li>
+    {% endfor %}
+{% endblock %}

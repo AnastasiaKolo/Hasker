@@ -1,0 +1,100 @@
+{% extends "base/generic.html" %}
+
+{% load static %}
+
+{% block content %}
+    <p>
+        {% if user.profile.avatar %}
+            <img src="{{ user.profile.avatar.url }}" height=256 alt="Avatar"/>
+        {% else %}
+            <img src="{% static "qa/img/default_avatar.png" %}" height=256 alt="Avatar"/>
+        {% endif %}
+    </p>
+    {% if user_form.errors %}
+        <div class="alert alert-danger alert-dismissible" role="alert">
+            <div id="form_errors">
+                {% for key, value in user_form.errors.items %}
+                    <strong>{{ value }}</strong>
+                {% endfor %}
+            </div>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endif %}
+    <div class="form-content">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <label class="small mb-1">Username:</label>
+                            {{ user_form.username }}
+                        <label class="small mb-1">Email:</label>
+                            {{ user_form.email }}
+                    </div>
+                    <div class="form-group">
+                        <a href="{% url 'password_change' %}">Change Password</a>
+                        <hr>
+                        <label class="small mb-1">Change Avatar:</label>
+                        {{ profile_form.avatar }}
+                    </div>
+                </div>
+            </div>
+            <br><br>
+            <button type="submit" class="btn btn-secondary">Save Changes</button>
+            <button type="reset" class="btn btn-secondary">Reset</button>
+        </form>
+    </div>
+    {% comment %} {% if error %}
+    <h2>{{ error }}</h2>
+    {% else %}
+        <p>
+            {% if profile.avatar %}
+                <img src="{{ profile.avatar.url }}" height=256 alt="Avatar"/>
+            {% else %}
+                <img src="{% static "qa/img/default_avatar.png" %}" height=256 alt="Avatar"/>
+            {% endif %}
+        </p>
+        <p><strong>Username</strong>: {{ profile.user.username }}</p>
+        <p><strong>Email</strong>: {{ profile.user.email }}</p>
+        <p><strong>Member since</strong>: {{ profile.user.date_joined }}</p>
+        <p>
+            <form id="settings" method="post" action="{% url 'users:settings' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary">Edit settings</button>
+            </form>
+        </p> {% endcomment %}
+        {% comment %} <h2>Best questions</h2>
+        <ul class="qa_list questions">
+        {% for question in profile.question_set.all|slice:":10" %}
+            <li>
+                <span class="date">{{ question.published|date:"d.m.Y" }}</span>
+                <a href="{% url "question:detail" id=question.pk %}">
+                    {{ question.title|truncatewords:10 }}
+                </a>
+                (
+                    {{ question.votes }} {{ question.votes|pluralize:"vote,votes" }},
+                    {{ question.answers.count }} {{ question.answers.count|pluralize:"answer,answers" }}
+                )
+            </li>
+        {% endfor %}
+        </ul> {% endcomment %}
+
+        {% comment %} <h2>Best answers</h2>
+        <ul class="qa_list answers">
+        {% for answer in profile.answer_set.all|slice:":10" %}
+            <li>
+                <span class="date">{{ answer.created|date:"d.m.Y" }}</span>
+                <a href="{% url "qa:detail" id=answer.question.pk %}#answer_{{ answer.id }}">
+                    {{ answer.text|truncatewords:10 }}
+                </a>
+                (
+                    {{ answer.votes }} {{ answer.votes|pluralize:"vote,votes" }},
+                    вопрос - {{ answer.question.title|truncatewords:10 }}
+                )
+            </li>
+        {% endfor %}
+        </ul> {% endcomment %}
+    {% comment %} {% endif %} {% endcomment %}
+{% endblock %}

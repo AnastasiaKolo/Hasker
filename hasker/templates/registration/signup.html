@@ -1,0 +1,29 @@
+{% extends "base/generic.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+
+    {% if user_form.errors %}
+
+        {% for field in user_form.visible_fields %}
+            {% for error in field.errors %}
+                <p style="color:red">Error in field {{ field.name }}: {{ error }}</p>
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" action="{% url 'users:signup' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-row">
+
+            <div class="form-group">
+                <table>
+                    {{ user_form.as_table }}
+                </table>
+            </div> 
+        </div>
+        <input type="submit" value="Submit" />
+    </form>
+
+{% endblock %}
